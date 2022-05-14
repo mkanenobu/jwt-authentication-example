@@ -1,6 +1,7 @@
 import type { Handler } from "express";
 import { findUserByUsername, verifyUserToken } from "../repository/users";
 import { globalKeys } from "../global-keys";
+import { parseAuthorizationHeader } from "../jwt";
 
 export const verifyTokenMiddleware: Handler = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -12,15 +13,18 @@ export const verifyTokenMiddleware: Handler = (req, res, next) => {
     return;
   }
 
-  const [key, value] = authHeader.split(" ");
-
-  if (key !== "Bearer") {
-    error401();
+  let userToken: string;
+  try {
+    const { bearerValue } = parseAuthorizationHeader(authHeader);
+    userToken = bearerValue;
+  } catch (e) {
+    // @ts-ignore
+    error401(e.message);
     return;
   }
 
   try {
-    const token = verifyUserToken(value);
+    const token = verifyUserToken(userToken);
 
     const username = token.username;
 

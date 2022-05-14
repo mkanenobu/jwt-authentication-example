@@ -17,3 +17,17 @@ export const jwtVerify = (token: string, key: Secret): JwtPayload => {
 
   return p;
 };
+
+/**
+ * @throws Error
+ */
+export const parseAuthorizationHeader = (
+  authHeader: string
+): { bearerValue: string } => {
+  const [key, bearerValue] = authHeader.split(" ");
+  if (key !== "Bearer") {
+    throw new Error("Invalid authorization header.");
+  }
+
+  return { bearerValue };
+};
